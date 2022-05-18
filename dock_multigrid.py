@@ -2,7 +2,7 @@ import os
 from argparse import ArgumentParser
 
 parser = ArgumentParser(description='multi grid docking')
-parser.add_argument('--csv', metavar='CSV', help='input csv', dest='csv', required=True)
+parser.add_argument('--csv', metavar='CSV', help='input file(csv, sdf)', dest='csv', required=True)
 parser.add_argument('--ref', help='smiles csv file', default=None, dest='ref')
 parser.add_argument('--dir', help='raw data directory', dest='dir', required = True)
 
