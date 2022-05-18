@@ -19,7 +19,7 @@ def make_result_json(dir_name, df, outmae, col):
         else:
             result[row[col]].append(i)
 
-    with open(os.path.join(dir_name, outmae.replace('.maegz','_cpd_indexs.json')), 'w') as f:
+    with open(os.path.join(dir_name, outmae.replace('_pv.maegz','_cpd_indexs.json')), 'w') as f:
         json.dump(result, f, indent=4)
     f.close()
     
@@ -47,9 +47,11 @@ def collect_result(result_dir, split_dir, cpd_indexs, df, outmae):
                 break
     
     dir_name = os.path.dirname(split_dir) 
+    
     with open(os.path.join(dir_name, outmae.replace('.mae', 'result_index.json')),'w') as f:
         json.dump(result, f, indent=4)
     f.close()
+    
     df['mol2'] = df.index.map(lambda x : '{}-{}.txt'.format(fname, , str(x + 2).zfill(4)))
     df.loc[indexs].to_csv(os.path.join(dir_name, 'ML_result.csv'), index = False)
 
