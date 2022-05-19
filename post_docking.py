@@ -1,12 +1,7 @@
 from argparse import ArgumentParser
-import pandas as pd
-import os
-import json
-from rdkit import Chem
 
 parser = ArgumentParser(description='post docking process')
 parser.add_argument('--mae', metavar='MAE', help='input pose viewer file', dest='mae', required=True)
-parser.add_argument('--col', help='input col name of compound', dest='col', default='s_sd_cpd\_id')
 
 def make_ifp(mae):
     csv = os.path.abspath(mae.replace('_pv.maegz', '_IFP.csv'))
