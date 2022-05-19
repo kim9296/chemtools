@@ -10,14 +10,12 @@ parser.add_argument('--grid', metavar='grid', help='docking grid', dest='grid', 
 parser.add_argument('--node', help='clac_node', dest='node', default='node4')
 parser.add_argument('--num',  help='num of node', dest='num', default=10)
 
-if __name__ == '__main__':
-    args = parser.parse_args()
-    
-    csv_name = os.path.abspath(args.inp)
-    if args.ref is not None:
-    	ref_name = os.path.abspath(args.ref)
+def ligand_docking(input_file, ref, grid, node, num):
+    csv_name = os.path.abspath(input_file)
+    if ref is not None:
+    	ref_name = os.path.abspath(ref)
     out_name = csv_name.replace('raw', 'result')
-    grid_name = os.path.abspath(args.grid)
+    grid_name = os.path.abspath(grid)
     dir_name = os.path.dirname(out_name)
     if 'sdf' in csv_name:
 	    sdf_name = out_name
@@ -27,9 +25,9 @@ if __name__ == '__main__':
     ligand_name = sdf_name.replace('.sdf', '.maegz')
     docking_in = sdf_name.replace('.sdf', '_{}.in'.format(grid_base.split('.zip')[0]))
     docking_out = sdf_name.replace('.sdf', '_pv.maegz')    
-    
+
     if not os.path.exists(ligand_name):
-        if args.ref is not None:
+        if ref is not None:
             print ('preprocess csv')
             fill_smiles(csv_name, ref_name)
         else:
@@ -42,7 +40,7 @@ if __name__ == '__main__':
         os.chdir(dir_name)   
     
         print ('ligprep')
-        os.system('$SCHRODINGER/ligprep -u s_sd_cpd\_id -isd {} -omae {} -epik -HOST {}:{} -TMPLAUNCHDIR -WAIT'.format(sdf_name, ligand_name, args.node, args.num))
+        os.system('$SCHRODINGER/ligprep -u s_sd_cpd\_id -isd {} -omae {} -epik -HOST {}:{} -TMPLAUNCHDIR -WAIT'.format(sdf_name, ligand_name, node, num))
     
     else:
         os.chdir(dir_name)
@@ -59,7 +57,10 @@ if __name__ == '__main__':
     os.chdir('glide')
 
     print ('ligand docking')
-    os.system('$SCHRODINGER/glide {} -adjust -HOST {}:{} -NOJOBID -TMPLAUNCHDIR -WAIT'.format(docking_in, args.node, args.num))
+    os.system('$SCHRODINGER/glide {} -adjust -HOST {}:{} -NOJOBID -TMPLAUNCHDIR -WAIT'.format(docking_in, node, num))
     os.system('mv {} ../'.format(docking_out))
 
+if __name__ == '__main__':
+    args = parser.parse_args()
+    ligand_docking(args.inp, args.ref, args.grid, args.node, args.num)
     print ('finish')
