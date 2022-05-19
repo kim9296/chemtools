@@ -20,7 +20,7 @@ if __name__ == '__main__':
     grid_name = os.path.abspath(args.grid)
     dir_name = os.path.dirname(out_name)
     if 'sdf' in csv_name:
-	sdf_name = out_name
+	    sdf_name = out_name
     else:
         sdf_name = out_name.replace('.csv', '.sdf')
     grid_base = os.path.basename(grid_name)
