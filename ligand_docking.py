@@ -7,6 +7,8 @@ parser = ArgumentParser(description='ligand docking')
 parser.add_argument('--inp', help='input files (csv, sdf)', dest='inp', required=True)
 parser.add_argument('--ref', help='smiles csv file', default=None, type=str)
 parser.add_argument('--grid', metavar='grid', help='docking grid', dest='grid', required=True)
+parser.add_argument('--node', help='clac_node', dest='node', default='node4')
+parser.add_argument('--num',  help='num of node', dest='num', default=10)
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -40,7 +42,7 @@ if __name__ == '__main__':
         os.chdir(dir_name)   
     
         print ('ligprep')
-        os.system('$SCHRODINGER/ligprep -u s_sd_cpd\_id -isd {} -omae {} -epik -HOST node4:10 -TMPLAUNCHDIR -WAIT'.format(sdf_name, ligand_name))
+        os.system('$SCHRODINGER/ligprep -u s_sd_cpd\_id -isd {} -omae {} -epik -HOST {}:{} -TMPLAUNCHDIR -WAIT'.format(sdf_name, ligand_name, args.node, args.num))
     
     else:
         os.chdir(dir_name)
@@ -57,7 +59,7 @@ if __name__ == '__main__':
     os.chdir('glide')
 
     print ('ligand docking')
-    os.system('$SCHRODINGER/glide {} -adjust -HOST node4:10 -NOJOBID -TMPLAUNCHDIR -WAIT'.format(docking_in))
+    os.system('$SCHRODINGER/glide {} -adjust -HOST {}:{} -NOJOBID -TMPLAUNCHDIR -WAIT'.format(docking_in, args.node, args.num))
     os.system('mv {} ../'.format(docking_out))
 
     print ('finish')

@@ -4,6 +4,8 @@ from argparse import ArgumentParser
 parser = ArgumentParser(description='make grid from ref grid')
 parser.add_argument('--ref', help='ref grid', dest='ref', required = True)
 parser.add_argument('--prt', help='protein for make grid', dest='prt', required =True)
+parser.add_argument('--node', help='clac_node', dest='node', default='node4')
+parser.add_argument('--num',  help='num of node', dest='num', default=10)
 
 args = parser.parse_args()
 
@@ -25,4 +27,4 @@ if not os.path.exists(grid_dir):
 	f.write(temp[4])
 	f.write('RECEP_FILE    {}.maegz'.format(grid_dir))
     f.close()
-    os.system('$SCHRODINGER/glide {}.in -OVERWRITE -HOST node4:10 -TMPLAUNCHDIR'.format(grid_dir))
+    os.system('$SCHRODINGER/glide {}.in -OVERWRITE -HOST {}:{} -TMPLAUNCHDIR'.format(grid_dir, args.node, args.num))
