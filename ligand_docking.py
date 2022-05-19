@@ -11,6 +11,7 @@ parser.add_argument('--node', help='clac_node', dest='node', default='node4')
 parser.add_argument('--num',  help='num of node', dest='num', default=10)
 
 def ligand_docking(input_file, ref, grid, node, num):
+    curdir = os.path.abspath('.')
     csv_name = os.path.abspath(input_file)
     if ref is not None:
     	ref_name = os.path.abspath(ref)
@@ -24,7 +25,7 @@ def ligand_docking(input_file, ref, grid, node, num):
     grid_base = os.path.basename(grid_name)
     ligand_name = sdf_name.replace('.sdf', '.maegz')
     docking_in = sdf_name.replace('.sdf', '_{}.in'.format(grid_base.split('.zip')[0]))
-    docking_out = sdf_name.replace('.sdf', '_pv.maegz')    
+    docking_out = os.path.basename(docking_in.replace('.in', '_pv.maegz'))    
 
     if not os.path.exists(ligand_name):
         if ref is not None:
@@ -58,8 +59,18 @@ def ligand_docking(input_file, ref, grid, node, num):
 
     print ('ligand docking')
     os.system('$SCHRODINGER/glide {} -adjust -HOST {}:{} -NOJOBID -TMPLAUNCHDIR -WAIT'.format(docking_in, node, num))
-    os.system('mv {} ../'.format(docking_out))
+    os.system('mv {}/glide/{} ../'.format(dir_name, docking_out))
 
+    os.chdir('../')
+
+    mae = os.path.join(dir_name, docking_out)
+    csv = os.path.abspath(mae.replace('_pv.maegz', '_IFP.csv'))
+    sdf = csv.replace('.csv', '.sdf')
+    os.system('$SCHRODINGER/run interaction_fingerprints.py -i {} -ocsv {}'.format(mae, csv))
+    os.system('$SCHRODINGER/utilities/sdconvert -n 2: -imae {} -osd {}'.format(mae, sdf))
+
+    os.chdir(curdir)
+    
 if __name__ == '__main__':
     args = parser.parse_args()
     ligand_docking(args.inp, args.ref, args.grid, args.node, args.num)
