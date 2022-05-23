@@ -1,10 +1,12 @@
 from argparse import ArgumentParser
 import pandas as pd
+import numpy as np
 from rdkit import Chem
 
 parser = ArgumentParser(description='post docking process')
 parser.add_argument('--csv', help='input IFP csv file', dest='csv', required=True)
 parser.add_argument('--xcol', help='ligand column name', dest='xcol', required=True)
+parser.add_argument('--ycol', help='y coloumn name', dest='ycol', default=None)
 parser.add_argument('--res',
                     metavar='<residue>',
                     help='key residue which has hbond with ligand (ex: 117,119)',
@@ -26,10 +28,19 @@ def str2range(inp, maxlen):
             result.append(int(x))
     return result
 
-def make_dataset(csv, xcol, res):
+def make_dataset(csv, xcol, res, ycol=None):
     sdf = csv.replace('.csv', '.sdf')
     df = pd.read_csv(csv)
     df['index'] = df.index.map(lambda x: x)
+    
+    ycols = [x for x in df.columns if ycol in x]
+    if len(ycols) == 2:
+        df[ycol] = np.where(pd.notnull(df[ycols[0]]) == True, df[ycols[0]], df[ycols[1]])
+    elif len(ycols) > 2:
+        raise ('too many ycols, check IFP.csv')
+    else:
+        df[ycol] = df[ycols[0]]
+
     df = df.sort_values(by='r_i_glide_gscore', ascending=True).reset_index(drop=True)
     raw = Chem.SDMolSupplier(sdf)
     raw_mols = list()
@@ -75,6 +86,6 @@ if __name__ == '__main__':
     
     # Make Dataset
     print ('make Dataset from IFP')
-    make_dataset(args.csv, args.xcol, args.res)
+    make_dataset(args.csv, args.xcol, args.res, args.ycol)
 
     print ('finish')
