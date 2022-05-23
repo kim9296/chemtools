@@ -1,19 +1,80 @@
 from argparse import ArgumentParser
+import pandas as pd
+from rdkit import Chem
 
 parser = ArgumentParser(description='post docking process')
-parser.add_argument('--mae', metavar='MAE', help='input pose viewer file', dest='mae', required=True)
+parser.add_argument('--csv', help='input IFP csv file', dest='csv', required=True)
+parser.add_argument('--xcol', help='ligand column name', dest='xcol', required=True)
+parser.add_argument('--res',
+                    metavar='<residue>',
+                    help='key residue which has hbond with ligand (ex: 117,119)',
+                    dest='res',
+                    default = None)
 
-def make_ifp(mae):
-    csv = os.path.abspath(mae.replace('_pv.maegz', '_IFP.csv'))
+def str2range(inp, maxlen):
+    result = list()
+    temp = inp.split(',')
+    for x in temp:
+        if ':' in x:
+            tmp = x.split(':')
+            if tmp[0] == '':
+                tmp[0] = 1
+            elif tmp[1] == '':
+                tmp[1] = maxlen
+            result += range(int(tmp[0]) - 1, int(tmp[1]))
+        else:
+            result.append(int(x))
+    return result
+
+def make_dataset(csv, xcol, res):
     sdf = csv.replace('.csv', '.sdf')
-    os.system('$SCHRODINGER/run interaction_fingerprints.py -i {} -ocsv {}'.format(mae, csv))
-    os.system('$SCHRODINGER/utilities/sdconvert -n 2: -imae {} -osd {}'.format(mae, sdf))
+    df = pd.read_csv(csv)
+    df['index'] = df.index.map(lambda x: x)
+    df = df.sort_values(by='r_i_glide_gscore', ascending=True).reset_index(drop=True)
+    raw = Chem.SDMolSupplier(sdf)
+    raw_mols = list()
+    for mol in raw:
+        raw_mols.append(mol)    
+
+    result = dict()
+    indexs = list()
+    for i, row in df.iterrows():
+        if row[xcol] not in result.keys():
+            result[row[xcol]] = row['index']
+            indexs.append(i)
+
+    # indexs = list(result.values())
+    df.loc[indexs].to_csv(csv.replace('.csv', '_full_dataset.csv'), index = False)
+    
+    out_mol = Chem.SDWriter(sdf.replace('.sdf', '_full_dataset.sdf'))
+    for i in list(result.values()):
+        out_mol.write(raw_mols[i])
+    out_mol.close()
+
+    if res is not None:
+        
+        res_columns = ['r_glide_res:A{}_hbond'.format(x.strip()) for x in res.split(',')]
+
+        result = dict()
+        indexs = list()
+        for i, row in df.iterrows():
+            if row[xcol] not in result.keys() and sum(row[res_columns]) != 0:
+                result[row[xcol]] = row['index']
+                indexs.append(i)
+
+        # indexs = list(result.values())
+        df.loc[indexs].to_csv(csv.replace('.csv', '_pose_dataset.csv'), index = False)
+        
+        out_mol = Chem.SDWriter(sdf.replace('.sdf', '_pose_dataset.sdf'))
+        for i in list(result.values()):
+            out_mol.write(raw_mols[i])
+        out_mol.close()
 
 if __name__ == '__main__':
     args = parser.parse_args()
     
-    # Make IFP csv files
-    print ('make IFP and convert sdf')
-    make_ifp(args.mae)
+    # Make Dataset
+    print ('make Dataset from IFP')
+    make_dataset(args.csv, args.xcol, args.res)
 
     print ('finish')
