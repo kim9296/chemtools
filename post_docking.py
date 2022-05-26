@@ -40,7 +40,6 @@ def make_dataset(csv, xcol, res, ycol=None):
         df[ycol] = np.where(pd.notnull(df[ycols[0]]) == True, df[ycols[0]], df[ycols[1]])
         for i in range(1, len(ycols)):
             df[ycol] = np.where(pd.notnull(df[ycol]) == True, df[ycol], df[ycols[i]])
-        raise ('too many ycols, check IFP.csv')
     else:
         df[ycol] = df[ycols[0]]
 
