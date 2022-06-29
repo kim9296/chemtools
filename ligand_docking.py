@@ -41,7 +41,7 @@ def ligand_docking(input_file, ref, grid, node, num):
         os.chdir(dir_name)   
     
         print ('ligprep')
-        os.system('$SCHRODINGER/ligprep -u s_sd_cpd\_id -isd {} -omae {} -epik -HOST {}:{} -TMPLAUNCHDIR -WAIT-RESTART'.format(sdf_name, ligand_name, node, num))
+        os.system('$SCHRODINGER/ligprep -u s_sd_cpd\_id -isd {} -omae {} -epik -HOST {}:{} -TMPLAUNCHDIR -WAIT'.format(sdf_name, ligand_name, node, num))
     
     else:
         os.chdir(dir_name)
