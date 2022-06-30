@@ -12,7 +12,10 @@ parser.add_argument('--num',  help='num of node', dest='num', default=10)
 if __name__=='__main__':
     args = parser.parse_args()
     for x in [x for x in os.listdir(args.dir) if 'glide-grid' in x]:
-        grid_zip = '{}/{}/{}.zip'.format(args.dir, x, x)
+        if '.zip' not in x:
+            grid_zip = '{}/{}/{}.zip'.format(args.dir, x, x)
+        else:
+            grid_zip = '{}/{}'.format(args.dir, x)
         ligand_docking(args.csv, args.ref, grid_zip, args.node, args.num)
         # os.system('/home/novorex/anaconda3/envs/ENL/bin/python ligand_docking.py --csv {} --ref {} --grid {}/{}/{}.zip --node {} --num {}'.format(args.csv, args.ref, args.dir, x, x, args.node, args.num))
     
