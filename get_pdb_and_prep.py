@@ -5,6 +5,8 @@ parser = ArgumentParser(description='Get PDB and run prepwizard')
 parser.add_argument('--inp', help='PDB code', dest='inp', nargs='+', required=True)
 
 def GetPDBandPrep(pdb_code):
+    if os.path.exists('proteinprep_{}'.format(pdb_code)):
+        return
     os.system('$SCHRODINGER/utilities/getpdb {}'.format(pdb_code))
     os.makedirs('proteinprep_{}'.format(pdb_code))
     os.system('mv {}.pdb proteinprep_{}'.format(pdb_code, pdb_code))
